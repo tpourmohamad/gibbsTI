@@ -6,7 +6,7 @@
 
 **gibbsTI** provides tools for constructing and calibrating Gibbs posteriors to create robust frequentist tolerance intervals. 
 
-> ⚠️ **Note:** This package is currently under active development. The API is subject to change, and you may encounter bugs. Please report any issues or feedback via the [GitHub Issue Tracker](https://github.com/YourGitHubUsername/gibbsTI/issues).
+> ⚠️ **Note:** This package is currently under active development. The API is subject to change, and you may encounter bugs. Please report any issues or feedback via the [GitHub Issue Tracker](https://github.com/tpourmohamad/gibbsTI/issues).
 
 ---
 
