@@ -4,7 +4,7 @@
 
 [![Project Status: Under Development](https://img.shields.io/badge/status-under--development-orange.svg)](https://www.repostatus.org/#active)
 
-**gibbsTI** provides tools for constructing and calibrating Gibbs posteriors to create robust frequentist tolerance intervals. 
+**gibbsTI** provides tools for constructing one-sided and two-sided nonparametric tolerance intervals using calibrated Gibbs posteriors.
 
 > ⚠️ **Note:** This package is currently under active development. The API is subject to change, and you may encounter bugs. Please report any issues or feedback via the [GitHub Issue Tracker](https://github.com/tpourmohamad/gibbsTI/issues).
 
