@@ -12,8 +12,20 @@
 #' @param calibrate Logical; whether to use GPC calibration.
 #' @param eta_method "GPC" (automated) or "fixed".
 #' @param eta Fixed value of eta if calibrate = FALSE.
+#' @param max_iter Maximum number of iterations for the GPC eta search (default is 15).
+#' @param control A list of control parameters for MCMC and GPC:
+#' \itemize{
+#'   \item \code{B}: Number of bootstrap replicates for calibration (default 200).
+#'   \item \code{tol}: Convergence tolerance for eta (default 1e-3).
+#'   \item \code{c}, \code{gamma}: Step-size parameters for Robbins-Monro (defaults 0.5, 0.75).
+#'   \item \code{w}, \code{m}: Slice sampler width and max steps for one-sided intervals.
+#'   \item \code{prop_sd}: Proposal standard deviation for Metropolis-Hastings in two-sided case.
+#'   \item \code{n_samps_calib}: MCMC samples used per bootstrap during calibration (default 1000).
+#'   \item \code{burnin_calib}: Burn-in used per bootstrap during calibration (default 200).
+#' }
 #' @param n_mcmc Number of iterations for final sampling.
 #' @param burnin Number of burn-in iterations.
+#' @param thin Thinning interval for MCMC sampling (default is 1).
 #' @param seed Random seed.
 #' @param verbose Logical; if TRUE, prints progress messages and iterative calibration updates to the console.
 #'
@@ -32,8 +44,11 @@ gibbsTI <- function(
     calibrate = TRUE,
     eta_method = c("GPC", "fixed"),
     eta = NULL,
+    max_iter = 15,
+    control = list(),
     n_mcmc = 5000,
     burnin = 1000,
+    thin = 1,
     seed = NULL,
     verbose = TRUE
 ) {
@@ -43,6 +58,10 @@ gibbsTI <- function(
   type <- match.arg(type)
   target <- match.arg(target)
   eta_method <- match.arg(eta_method)
+
+  con <- list(B = 200, tol = 1e-3, c = 0.5, gamma = 0.75, w = 0.5, m = 1000, prop_sd = 0.5,
+              n_samps_calib = 1000, burnin_calib = 200)
+  con[names(control)] <- control
 
   # 2. Logic to set tau values
   if (target == "content") {
@@ -89,7 +108,17 @@ gibbsTI <- function(
       tau_lower = tau_lower,
       tau_upper = tau_upper,
       verbose = verbose,
-      eta0 = eta_start  # <--- Pass the starting value here
+      eta0 = eta_start,
+      max_iter = max_iter,
+      B = con$B,
+      tol = con$tol,
+      c = con$c,
+      gamma = con$gamma,
+      prop_sd = con$prop_sd,
+      w = con$w,
+      m = con$m,
+      n_samps_boot = con$n_samps_calib,
+      burn_in_boot = con$burnin_calib
     )
   } else {
     # If not calibrating, use supplied eta or default to 1.0
@@ -114,6 +143,10 @@ gibbsTI <- function(
     eta = eta_val,
     n_mcmc = n_mcmc,
     burnin = burnin,
+    thin = thin,
+    w = con$w,
+    m = con$m,
+    prop_sd = con$prop_sd,
     verbose = verbose
   )
 
@@ -142,7 +175,8 @@ gibbsTI <- function(
       content = content,
       confidence = confidence,
       n_mcmc = n_mcmc,
-      eta_method = eta_method
+      eta_method = eta_method,
+      control = con
     )
   )
   class(fit) <- "gibbsTI"

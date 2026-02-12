@@ -14,6 +14,10 @@
   eta,
   n_mcmc,
   burnin,
+  thin,
+  w,
+  m,
+  prop_sd,
   verbose
 )
 }

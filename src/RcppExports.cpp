@@ -30,8 +30,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // bootstrap_coverage_cpp
-double bootstrap_coverage_cpp(double tau, double alpha, int B, double eta, double theta_hat, NumericMatrix boots);
-RcppExport SEXP _gibbsTI_bootstrap_coverage_cpp(SEXP tauSEXP, SEXP alphaSEXP, SEXP BSEXP, SEXP etaSEXP, SEXP theta_hatSEXP, SEXP bootsSEXP) {
+double bootstrap_coverage_cpp(double tau, double alpha, int B, double eta, double theta_hat, NumericMatrix boots, int n_samps_boot, int burn_in_boot, double w, int m);
+RcppExport SEXP _gibbsTI_bootstrap_coverage_cpp(SEXP tauSEXP, SEXP alphaSEXP, SEXP BSEXP, SEXP etaSEXP, SEXP theta_hatSEXP, SEXP bootsSEXP, SEXP n_samps_bootSEXP, SEXP burn_in_bootSEXP, SEXP wSEXP, SEXP mSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -41,13 +41,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type eta(etaSEXP);
     Rcpp::traits::input_parameter< double >::type theta_hat(theta_hatSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type boots(bootsSEXP);
-    rcpp_result_gen = Rcpp::wrap(bootstrap_coverage_cpp(tau, alpha, B, eta, theta_hat, boots));
+    Rcpp::traits::input_parameter< int >::type n_samps_boot(n_samps_bootSEXP);
+    Rcpp::traits::input_parameter< int >::type burn_in_boot(burn_in_bootSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< int >::type m(mSEXP);
+    rcpp_result_gen = Rcpp::wrap(bootstrap_coverage_cpp(tau, alpha, B, eta, theta_hat, boots, n_samps_boot, burn_in_boot, w, m));
     return rcpp_result_gen;
 END_RCPP
 }
 // calibrate_eta_cpp
-List calibrate_eta_cpp(NumericVector y, double tau, double alpha, double eta0, int B, int max_iter, double tol, double c, double gamma, bool verbose);
-RcppExport SEXP _gibbsTI_calibrate_eta_cpp(SEXP ySEXP, SEXP tauSEXP, SEXP alphaSEXP, SEXP eta0SEXP, SEXP BSEXP, SEXP max_iterSEXP, SEXP tolSEXP, SEXP cSEXP, SEXP gammaSEXP, SEXP verboseSEXP) {
+List calibrate_eta_cpp(NumericVector y, double tau, double alpha, double eta0, int B, int max_iter, double tol, double c, double gamma, int n_samps_boot, int burn_in_boot, double w, int m, bool verbose);
+RcppExport SEXP _gibbsTI_calibrate_eta_cpp(SEXP ySEXP, SEXP tauSEXP, SEXP alphaSEXP, SEXP eta0SEXP, SEXP BSEXP, SEXP max_iterSEXP, SEXP tolSEXP, SEXP cSEXP, SEXP gammaSEXP, SEXP n_samps_bootSEXP, SEXP burn_in_bootSEXP, SEXP wSEXP, SEXP mSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -60,14 +64,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< double >::type c(cSEXP);
     Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< int >::type n_samps_boot(n_samps_bootSEXP);
+    Rcpp::traits::input_parameter< int >::type burn_in_boot(burn_in_bootSEXP);
+    Rcpp::traits::input_parameter< double >::type w(wSEXP);
+    Rcpp::traits::input_parameter< int >::type m(mSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(calibrate_eta_cpp(y, tau, alpha, eta0, B, max_iter, tol, c, gamma, verbose));
+    rcpp_result_gen = Rcpp::wrap(calibrate_eta_cpp(y, tau, alpha, eta0, B, max_iter, tol, c, gamma, n_samps_boot, burn_in_boot, w, m, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 // sample_joint_cpp
-NumericMatrix sample_joint_cpp(NumericVector y, double tau_lower, double tau_upper, double eta, int n_samps, int burn_in);
-RcppExport SEXP _gibbsTI_sample_joint_cpp(SEXP ySEXP, SEXP tau_lowerSEXP, SEXP tau_upperSEXP, SEXP etaSEXP, SEXP n_sampsSEXP, SEXP burn_inSEXP) {
+NumericMatrix sample_joint_cpp(NumericVector y, double tau_lower, double tau_upper, double eta, int n_samps, int burn_in, double prop_sd);
+RcppExport SEXP _gibbsTI_sample_joint_cpp(SEXP ySEXP, SEXP tau_lowerSEXP, SEXP tau_upperSEXP, SEXP etaSEXP, SEXP n_sampsSEXP, SEXP burn_inSEXP, SEXP prop_sdSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -77,13 +85,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type eta(etaSEXP);
     Rcpp::traits::input_parameter< int >::type n_samps(n_sampsSEXP);
     Rcpp::traits::input_parameter< int >::type burn_in(burn_inSEXP);
-    rcpp_result_gen = Rcpp::wrap(sample_joint_cpp(y, tau_lower, tau_upper, eta, n_samps, burn_in));
+    Rcpp::traits::input_parameter< double >::type prop_sd(prop_sdSEXP);
+    rcpp_result_gen = Rcpp::wrap(sample_joint_cpp(y, tau_lower, tau_upper, eta, n_samps, burn_in, prop_sd));
     return rcpp_result_gen;
 END_RCPP
 }
 // bootstrap_coverage_content_cpp
-double bootstrap_coverage_content_cpp(double tl, double tu, double alpha, int B, double eta, NumericMatrix boots, NumericVector y_orig);
-RcppExport SEXP _gibbsTI_bootstrap_coverage_content_cpp(SEXP tlSEXP, SEXP tuSEXP, SEXP alphaSEXP, SEXP BSEXP, SEXP etaSEXP, SEXP bootsSEXP, SEXP y_origSEXP) {
+double bootstrap_coverage_content_cpp(double tl, double tu, double alpha, int B, double eta, NumericMatrix boots, NumericVector y_orig, int n_samps_boot, int burn_in_boot, double prop_sd);
+RcppExport SEXP _gibbsTI_bootstrap_coverage_content_cpp(SEXP tlSEXP, SEXP tuSEXP, SEXP alphaSEXP, SEXP BSEXP, SEXP etaSEXP, SEXP bootsSEXP, SEXP y_origSEXP, SEXP n_samps_bootSEXP, SEXP burn_in_bootSEXP, SEXP prop_sdSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -94,64 +103,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type eta(etaSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type boots(bootsSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type y_orig(y_origSEXP);
-    rcpp_result_gen = Rcpp::wrap(bootstrap_coverage_content_cpp(tl, tu, alpha, B, eta, boots, y_orig));
+    Rcpp::traits::input_parameter< int >::type n_samps_boot(n_samps_bootSEXP);
+    Rcpp::traits::input_parameter< int >::type burn_in_boot(burn_in_bootSEXP);
+    Rcpp::traits::input_parameter< double >::type prop_sd(prop_sdSEXP);
+    rcpp_result_gen = Rcpp::wrap(bootstrap_coverage_content_cpp(tl, tu, alpha, B, eta, boots, y_orig, n_samps_boot, burn_in_boot, prop_sd));
     return rcpp_result_gen;
 END_RCPP
 }
 // calibrate_eta_joint_content_cpp
-List calibrate_eta_joint_content_cpp(NumericVector y, double tau_lower, double tau_upper, double alpha, double eta0, int B, int max_iter, bool verbose);
-RcppExport SEXP _gibbsTI_calibrate_eta_joint_content_cpp(SEXP ySEXP, SEXP tau_lowerSEXP, SEXP tau_upperSEXP, SEXP alphaSEXP, SEXP eta0SEXP, SEXP BSEXP, SEXP max_iterSEXP, SEXP verboseSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< double >::type tau_lower(tau_lowerSEXP);
-    Rcpp::traits::input_parameter< double >::type tau_upper(tau_upperSEXP);
-    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< double >::type eta0(eta0SEXP);
-    Rcpp::traits::input_parameter< int >::type B(BSEXP);
-    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(calibrate_eta_joint_content_cpp(y, tau_lower, tau_upper, alpha, eta0, B, max_iter, verbose));
-    return rcpp_result_gen;
-END_RCPP
-}
-// sample_joint_quantile_cpp
-NumericMatrix sample_joint_quantile_cpp(NumericVector y, double tau_lower, double tau_upper, double eta, int n_samps, int burn_in);
-RcppExport SEXP _gibbsTI_sample_joint_quantile_cpp(SEXP ySEXP, SEXP tau_lowerSEXP, SEXP tau_upperSEXP, SEXP etaSEXP, SEXP n_sampsSEXP, SEXP burn_inSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< double >::type tau_lower(tau_lowerSEXP);
-    Rcpp::traits::input_parameter< double >::type tau_upper(tau_upperSEXP);
-    Rcpp::traits::input_parameter< double >::type eta(etaSEXP);
-    Rcpp::traits::input_parameter< int >::type n_samps(n_sampsSEXP);
-    Rcpp::traits::input_parameter< int >::type burn_in(burn_inSEXP);
-    rcpp_result_gen = Rcpp::wrap(sample_joint_quantile_cpp(y, tau_lower, tau_upper, eta, n_samps, burn_in));
-    return rcpp_result_gen;
-END_RCPP
-}
-// bootstrap_coverage_quantile_cpp
-double bootstrap_coverage_quantile_cpp(double tl, double tu, double alpha, int B, double eta, NumericVector theta_hat_vec, NumericMatrix boots);
-RcppExport SEXP _gibbsTI_bootstrap_coverage_quantile_cpp(SEXP tlSEXP, SEXP tuSEXP, SEXP alphaSEXP, SEXP BSEXP, SEXP etaSEXP, SEXP theta_hat_vecSEXP, SEXP bootsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type tl(tlSEXP);
-    Rcpp::traits::input_parameter< double >::type tu(tuSEXP);
-    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< int >::type B(BSEXP);
-    Rcpp::traits::input_parameter< double >::type eta(etaSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type theta_hat_vec(theta_hat_vecSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type boots(bootsSEXP);
-    rcpp_result_gen = Rcpp::wrap(bootstrap_coverage_quantile_cpp(tl, tu, alpha, B, eta, theta_hat_vec, boots));
-    return rcpp_result_gen;
-END_RCPP
-}
-// calibrate_eta_joint_quantile_cpp
-List calibrate_eta_joint_quantile_cpp(NumericVector y, double tau_lower, double tau_upper, double alpha, double eta0, int B, int max_iter, double tol, double c, double gamma, bool verbose);
-RcppExport SEXP _gibbsTI_calibrate_eta_joint_quantile_cpp(SEXP ySEXP, SEXP tau_lowerSEXP, SEXP tau_upperSEXP, SEXP alphaSEXP, SEXP eta0SEXP, SEXP BSEXP, SEXP max_iterSEXP, SEXP tolSEXP, SEXP cSEXP, SEXP gammaSEXP, SEXP verboseSEXP) {
+List calibrate_eta_joint_content_cpp(NumericVector y, double tau_lower, double tau_upper, double alpha, double eta0, int B, int max_iter, double tol, double c, double gamma, double prop_sd, int n_samps_boot, int burn_in_boot, bool verbose);
+RcppExport SEXP _gibbsTI_calibrate_eta_joint_content_cpp(SEXP ySEXP, SEXP tau_lowerSEXP, SEXP tau_upperSEXP, SEXP alphaSEXP, SEXP eta0SEXP, SEXP BSEXP, SEXP max_iterSEXP, SEXP tolSEXP, SEXP cSEXP, SEXP gammaSEXP, SEXP prop_sdSEXP, SEXP n_samps_bootSEXP, SEXP burn_in_bootSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -165,22 +126,86 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< double >::type c(cSEXP);
     Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< double >::type prop_sd(prop_sdSEXP);
+    Rcpp::traits::input_parameter< int >::type n_samps_boot(n_samps_bootSEXP);
+    Rcpp::traits::input_parameter< int >::type burn_in_boot(burn_in_bootSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(calibrate_eta_joint_quantile_cpp(y, tau_lower, tau_upper, alpha, eta0, B, max_iter, tol, c, gamma, verbose));
+    rcpp_result_gen = Rcpp::wrap(calibrate_eta_joint_content_cpp(y, tau_lower, tau_upper, alpha, eta0, B, max_iter, tol, c, gamma, prop_sd, n_samps_boot, burn_in_boot, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sample_joint_quantile_cpp
+NumericMatrix sample_joint_quantile_cpp(NumericVector y, double tau_lower, double tau_upper, double eta, int n_samps, int burn_in, double prop_sd);
+RcppExport SEXP _gibbsTI_sample_joint_quantile_cpp(SEXP ySEXP, SEXP tau_lowerSEXP, SEXP tau_upperSEXP, SEXP etaSEXP, SEXP n_sampsSEXP, SEXP burn_inSEXP, SEXP prop_sdSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< double >::type tau_lower(tau_lowerSEXP);
+    Rcpp::traits::input_parameter< double >::type tau_upper(tau_upperSEXP);
+    Rcpp::traits::input_parameter< double >::type eta(etaSEXP);
+    Rcpp::traits::input_parameter< int >::type n_samps(n_sampsSEXP);
+    Rcpp::traits::input_parameter< int >::type burn_in(burn_inSEXP);
+    Rcpp::traits::input_parameter< double >::type prop_sd(prop_sdSEXP);
+    rcpp_result_gen = Rcpp::wrap(sample_joint_quantile_cpp(y, tau_lower, tau_upper, eta, n_samps, burn_in, prop_sd));
+    return rcpp_result_gen;
+END_RCPP
+}
+// bootstrap_coverage_quantile_cpp
+double bootstrap_coverage_quantile_cpp(double tl, double tu, double alpha, int B, double eta, NumericVector theta_hat_vec, NumericMatrix boots, int n_samps_boot, int burn_in_boot, double prop_sd);
+RcppExport SEXP _gibbsTI_bootstrap_coverage_quantile_cpp(SEXP tlSEXP, SEXP tuSEXP, SEXP alphaSEXP, SEXP BSEXP, SEXP etaSEXP, SEXP theta_hat_vecSEXP, SEXP bootsSEXP, SEXP n_samps_bootSEXP, SEXP burn_in_bootSEXP, SEXP prop_sdSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type tl(tlSEXP);
+    Rcpp::traits::input_parameter< double >::type tu(tuSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< int >::type B(BSEXP);
+    Rcpp::traits::input_parameter< double >::type eta(etaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type theta_hat_vec(theta_hat_vecSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type boots(bootsSEXP);
+    Rcpp::traits::input_parameter< int >::type n_samps_boot(n_samps_bootSEXP);
+    Rcpp::traits::input_parameter< int >::type burn_in_boot(burn_in_bootSEXP);
+    Rcpp::traits::input_parameter< double >::type prop_sd(prop_sdSEXP);
+    rcpp_result_gen = Rcpp::wrap(bootstrap_coverage_quantile_cpp(tl, tu, alpha, B, eta, theta_hat_vec, boots, n_samps_boot, burn_in_boot, prop_sd));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calibrate_eta_joint_quantile_cpp
+List calibrate_eta_joint_quantile_cpp(NumericVector y, double tau_lower, double tau_upper, double alpha, double eta0, int B, int max_iter, double tol, double c, double gamma, double prop_sd, int n_samps_boot, int burn_in_boot, bool verbose);
+RcppExport SEXP _gibbsTI_calibrate_eta_joint_quantile_cpp(SEXP ySEXP, SEXP tau_lowerSEXP, SEXP tau_upperSEXP, SEXP alphaSEXP, SEXP eta0SEXP, SEXP BSEXP, SEXP max_iterSEXP, SEXP tolSEXP, SEXP cSEXP, SEXP gammaSEXP, SEXP prop_sdSEXP, SEXP n_samps_bootSEXP, SEXP burn_in_bootSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< double >::type tau_lower(tau_lowerSEXP);
+    Rcpp::traits::input_parameter< double >::type tau_upper(tau_upperSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< double >::type eta0(eta0SEXP);
+    Rcpp::traits::input_parameter< int >::type B(BSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< double >::type c(cSEXP);
+    Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< double >::type prop_sd(prop_sdSEXP);
+    Rcpp::traits::input_parameter< int >::type n_samps_boot(n_samps_bootSEXP);
+    Rcpp::traits::input_parameter< int >::type burn_in_boot(burn_in_bootSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(calibrate_eta_joint_quantile_cpp(y, tau_lower, tau_upper, alpha, eta0, B, max_iter, tol, c, gamma, prop_sd, n_samps_boot, burn_in_boot, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_gibbsTI_slice_sample_1d_cpp", (DL_FUNC) &_gibbsTI_slice_sample_1d_cpp, 9},
-    {"_gibbsTI_bootstrap_coverage_cpp", (DL_FUNC) &_gibbsTI_bootstrap_coverage_cpp, 6},
-    {"_gibbsTI_calibrate_eta_cpp", (DL_FUNC) &_gibbsTI_calibrate_eta_cpp, 10},
-    {"_gibbsTI_sample_joint_cpp", (DL_FUNC) &_gibbsTI_sample_joint_cpp, 6},
-    {"_gibbsTI_bootstrap_coverage_content_cpp", (DL_FUNC) &_gibbsTI_bootstrap_coverage_content_cpp, 7},
-    {"_gibbsTI_calibrate_eta_joint_content_cpp", (DL_FUNC) &_gibbsTI_calibrate_eta_joint_content_cpp, 8},
-    {"_gibbsTI_sample_joint_quantile_cpp", (DL_FUNC) &_gibbsTI_sample_joint_quantile_cpp, 6},
-    {"_gibbsTI_bootstrap_coverage_quantile_cpp", (DL_FUNC) &_gibbsTI_bootstrap_coverage_quantile_cpp, 7},
-    {"_gibbsTI_calibrate_eta_joint_quantile_cpp", (DL_FUNC) &_gibbsTI_calibrate_eta_joint_quantile_cpp, 11},
+    {"_gibbsTI_bootstrap_coverage_cpp", (DL_FUNC) &_gibbsTI_bootstrap_coverage_cpp, 10},
+    {"_gibbsTI_calibrate_eta_cpp", (DL_FUNC) &_gibbsTI_calibrate_eta_cpp, 14},
+    {"_gibbsTI_sample_joint_cpp", (DL_FUNC) &_gibbsTI_sample_joint_cpp, 7},
+    {"_gibbsTI_bootstrap_coverage_content_cpp", (DL_FUNC) &_gibbsTI_bootstrap_coverage_content_cpp, 10},
+    {"_gibbsTI_calibrate_eta_joint_content_cpp", (DL_FUNC) &_gibbsTI_calibrate_eta_joint_content_cpp, 14},
+    {"_gibbsTI_sample_joint_quantile_cpp", (DL_FUNC) &_gibbsTI_sample_joint_quantile_cpp, 7},
+    {"_gibbsTI_bootstrap_coverage_quantile_cpp", (DL_FUNC) &_gibbsTI_bootstrap_coverage_quantile_cpp, 10},
+    {"_gibbsTI_calibrate_eta_joint_quantile_cpp", (DL_FUNC) &_gibbsTI_calibrate_eta_joint_quantile_cpp, 14},
     {NULL, NULL, 0}
 };
 

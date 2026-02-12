@@ -14,7 +14,17 @@
   tau_lower,
   tau_upper,
   verbose,
-  eta0
+  eta0,
+  max_iter,
+  B,
+  tol,
+  c,
+  gamma,
+  prop_sd,
+  w,
+  m,
+  n_samps_boot,
+  burn_in_boot
 )
 }
 \description{

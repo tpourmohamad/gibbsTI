@@ -17,8 +17,11 @@ gibbsTI(
   calibrate = TRUE,
   eta_method = c("GPC", "fixed"),
   eta = NULL,
+  max_iter = 15,
+  control = list(),
   n_mcmc = 5000,
   burnin = 1000,
+  thin = 1,
   seed = NULL,
   verbose = TRUE
 )
@@ -48,9 +51,24 @@ gibbsTI(
 
 \item{eta}{Fixed value of eta if calibrate = FALSE.}
 
+\item{max_iter}{Maximum number of iterations for the GPC eta search (default is 15).}
+
+\item{control}{A list of control parameters for MCMC and GPC:
+\itemize{
+\item \code{B}: Number of bootstrap replicates for calibration (default 200).
+\item \code{tol}: Convergence tolerance for eta (default 1e-3).
+\item \code{c}, \code{gamma}: Step-size parameters for Robbins-Monro (defaults 0.5, 0.75).
+\item \code{w}, \code{m}: Slice sampler width and max steps for one-sided intervals.
+\item \code{prop_sd}: Proposal standard deviation for Metropolis-Hastings in two-sided case.
+\item \code{n_samps_calib}: MCMC samples used per bootstrap during calibration (default 1000).
+\item \code{burnin_calib}: Burn-in used per bootstrap during calibration (default 200).
+}}
+
 \item{n_mcmc}{Number of iterations for final sampling.}
 
 \item{burnin}{Number of burn-in iterations.}
+
+\item{thin}{Thinning interval for MCMC sampling (default is 1).}
 
 \item{seed}{Random seed.}
 
