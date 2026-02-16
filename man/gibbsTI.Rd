@@ -72,7 +72,7 @@ gibbsTI(
 
 \item{seed}{Random seed.}
 
-\item{verbose}{Logical; if TRUE, prints progress messages and iterative calibration updates to the console.}
+\item{verbose}{Logical; if TRUE, prints progress messages.}
 }
 \value{
 An object of class \code{"gibbsTI"}.

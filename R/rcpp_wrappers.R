@@ -61,7 +61,8 @@
     )
   }
 
-  return(out$final_eta)
+  # Return the WHOLE list, not just the eta value
+  return(out)
 }
 #' Internal wrapper for final MCMC sampling
 .run_sampler <- function(x, side, target, tau, tau_lower, tau_upper,

@@ -57,13 +57,12 @@ NumericMatrix sample_joint_cpp(NumericVector y,
   double logp = logpost_joint_content(t1, t2, y, tau_lower, tau_upper, eta);
 
   for(int i = 0; i < total; i++) {
-    // Random walk proposal using prop_sd
     double t1p = R::rnorm(t1, prop_sd);
     double t2p = R::rnorm(t2, prop_sd);
 
     double logpp = logpost_joint_content(t1p, t2p, y, tau_lower, tau_upper, eta);
 
-    if(log(R::runif(0,1)) < logpp - logp) {
+    if(std::isfinite(logpp - logp) && log(R::runif(0,1)) < logpp - logp) {
       t1 = t1p;
       t2 = t2p;
       logp = logpp;
@@ -89,11 +88,10 @@ double bootstrap_coverage_content_cpp(double tl,
                                       double eta,
                                       NumericMatrix boots,
                                       NumericVector y_orig,
-                                      int n_samps_boot,  // Added to control speed
-                                      int burn_in_boot,  // Added to control speed
-                                      double prop_sd) {   // Added to match sampler
+                                      int n_samps_boot,
+                                      int burn_in_boot,
+                                      double prop_sd) {
 
-  // Access the package namespace for the interval calculation
   Environment pkg = Environment::namespace_env("gibbsTI");
   Function compute_interval = pkg["compute_two_sided_interval"];
 
@@ -101,16 +99,13 @@ double bootstrap_coverage_content_cpp(double tl,
   double successes = 0.0;
 
   for(int b = 0; b < B; b++) {
-    // Run the sampler on the bootstrap data
     NumericMatrix post = sample_joint_cpp(boots(_, b), tl, tu, eta, n_samps_boot, burn_in_boot, prop_sd);
 
-    // Calculate the interval from posterior samples
     List interval = compute_interval(post(_,0), post(_,1), 1.0 - alpha);
 
     double L = interval["lower"];
     double U = interval["upper"];
 
-    // Check how many original data points fall within this bootstrap interval
     int cnt = 0;
     for(int i = 0; i < y_orig.size(); i++) {
       if(y_orig[i] >= L && y_orig[i] <= U)
@@ -136,12 +131,12 @@ List calibrate_eta_joint_content_cpp(NumericVector y,
                                      double eta0 = 1.0,
                                      int B = 200,
                                      int max_iter = 15,
-                                     double tol = 1e-3, // Added tol to match R wrapper
+                                     double tol = 1e-3,
                                      double c = 0.5,
                                      double gamma = 0.75,
                                      double prop_sd = 0.5,
-                                     int n_samps_boot = 1000, // <--- ADD THIS
-                                     int burn_in_boot = 200,  // <--- ADD THIS
+                                     int n_samps_boot = 1000,
+                                     int burn_in_boot = 200,
                                      bool verbose = true) {
 
   int n = y.size();
@@ -153,11 +148,13 @@ List calibrate_eta_joint_content_cpp(NumericVector y,
 
   double eta = eta0;
   double eta_prev = eta;
+  double final_cov = 0.0; // Captures final iteration coverage
 
   for(int s = 1; s <= max_iter; s++) {
-    // Pass the actual n_samps_boot and burn_in_boot variables here!
     double cover = bootstrap_coverage_content_cpp(tau_lower, tau_upper, alpha, B, eta,
                                                   boots, y, n_samps_boot, burn_in_boot, prop_sd);
+
+    final_cov = cover;
 
     if(verbose) {
       Rcpp::Rcout << "Iteration " << s << ": eta = " << std::fixed << std::setprecision(4)
@@ -170,12 +167,14 @@ List calibrate_eta_joint_content_cpp(NumericVector y,
 
     if(eta <= 0) eta = 1e-4;
 
-    // Optional: Add early convergence check to match your one-sided logic
     if(std::abs(eta - eta_prev) < tol) {
       if(verbose) Rcpp::Rcout << "Converged early at iteration " << s << std::endl;
       break;
     }
   }
 
-  return List::create(_["final_eta"] = eta);
+  return List::create(
+    _["final_eta"] = eta,
+    _["final_coverage"] = final_cov // Returned for package diagnostics
+  );
 }

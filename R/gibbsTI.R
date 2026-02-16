@@ -15,19 +15,19 @@
 #' @param max_iter Maximum number of iterations for the GPC eta search (default is 15).
 #' @param control A list of control parameters for MCMC and GPC:
 #' \itemize{
-#'   \item \code{B}: Number of bootstrap replicates for calibration (default 200).
-#'   \item \code{tol}: Convergence tolerance for eta (default 1e-3).
-#'   \item \code{c}, \code{gamma}: Step-size parameters for Robbins-Monro (defaults 0.5, 0.75).
-#'   \item \code{w}, \code{m}: Slice sampler width and max steps for one-sided intervals.
-#'   \item \code{prop_sd}: Proposal standard deviation for Metropolis-Hastings in two-sided case.
-#'   \item \code{n_samps_calib}: MCMC samples used per bootstrap during calibration (default 1000).
-#'   \item \code{burnin_calib}: Burn-in used per bootstrap during calibration (default 200).
+#'    \item \code{B}: Number of bootstrap replicates for calibration (default 200).
+#'    \item \code{tol}: Convergence tolerance for eta (default 1e-3).
+#'    \item \code{c}, \code{gamma}: Step-size parameters for Robbins-Monro (defaults 0.5, 0.75).
+#'    \item \code{w}, \code{m}: Slice sampler width and max steps for one-sided intervals.
+#'    \item \code{prop_sd}: Proposal standard deviation for Metropolis-Hastings in two-sided case.
+#'    \item \code{n_samps_calib}: MCMC samples used per bootstrap during calibration (default 1000).
+#'    \item \code{burnin_calib}: Burn-in used per bootstrap during calibration (default 200).
 #' }
 #' @param n_mcmc Number of iterations for final sampling.
 #' @param burnin Number of burn-in iterations.
 #' @param thin Thinning interval for MCMC sampling (default is 1).
 #' @param seed Random seed.
-#' @param verbose Logical; if TRUE, prints progress messages and iterative calibration updates to the console.
+#' @param verbose Logical; if TRUE, prints progress messages.
 #'
 #' @return An object of class \code{"gibbsTI"}.
 #' @export
@@ -59,11 +59,12 @@ gibbsTI <- function(
   target <- match.arg(target)
   eta_method <- match.arg(eta_method)
 
+  # Default control settings
   con <- list(B = 200, tol = 1e-3, c = 0.5, gamma = 0.75, w = 0.5, m = 1000, prop_sd = 0.5,
               n_samps_calib = 1000, burnin_calib = 200)
   con[names(control)] <- control
 
-  # 2. Logic to set tau values
+  # 2. Logic to set tau values based on target
   if (target == "content") {
     if (side == "one") {
       tau_use <- if(type == "upper") content else (1 - content)
@@ -74,31 +75,27 @@ gibbsTI <- function(
       tau_use <- NULL
     }
   } else {
-    # If target is 'quantile', prioritize user-supplied taus,
-    # but fallback to content-based tails if user left them NULL
     tau_use <- if(!is.null(tau)) tau else (if(type == "upper") content else (1-content))
-
     if (side == "two") {
       if(is.null(tau_lower)) tau_lower <- (1 - content) / 2
       if(is.null(tau_upper)) tau_upper <- 1 - (1 - content) / 2
     }
   }
 
-  # 3. Validation
-  .validate_inputs(x, content, confidence, target, tau_use, tau_lower, tau_upper, eta_method, eta)
-
   if (!is.null(seed)) set.seed(seed)
 
-  # 4. Calibration Phase
+  # Variables to store calibration diagnostics
+  final_coverage <- NULL
+  eta_history <- NULL
+
+  # 3. Calibration Phase
   if (calibrate && eta_method == "GPC") {
+    if(verbose) message(sprintf("Calibrating eta via GPC for %s-sided %s target...", side, target))
 
-    # Milestone message
-    message(sprintf("Calibrating eta via GPC for %s-sided %s target...", side, target))
-
-    # Use user-supplied eta as the starting value (eta0) if provided, else default to 1.0
     eta_start <- if (!is.null(eta)) eta else 1.0
 
-    eta_val <- .calibrate_eta_gpc(
+    # Capture the full list from C++
+    calib_res <- .calibrate_eta_gpc(
       x = x,
       side = side,
       target = target,
@@ -120,8 +117,13 @@ gibbsTI <- function(
       n_samps_boot = con$n_samps_calib,
       burn_in_boot = con$burnin_calib
     )
+
+    # Extract values from the C++ returned list
+    eta_val        <- calib_res$final_eta
+    final_coverage <- calib_res$final_coverage
+    eta_history    <- calib_res$eta_history
+
   } else {
-    # If not calibrating, use supplied eta or default to 1.0
     if (is.null(eta)) {
       if (eta_method == "fixed") stop("Must supply 'eta' when eta_method = 'fixed'.")
       eta_val <- 1.0
@@ -129,9 +131,9 @@ gibbsTI <- function(
       eta_val <- eta
     }
   }
-  # 5. Final Sampling Phase
-  # Milestone message: Always shown
-  message(sprintf("Generating final posterior samples (n = %d)...", n_mcmc))
+
+  # 4. Final Sampling Phase
+  if(verbose) message(sprintf("Generating final posterior samples (n = %d)...", n_mcmc))
 
   samples <- .run_sampler(
     x = x,
@@ -150,7 +152,7 @@ gibbsTI <- function(
     verbose = verbose
   )
 
-  # 6. Final Interval Calculation
+  # 5. Final Interval Calculation
   interval <- .compute_interval(
     samples = samples,
     eta_val = eta_val,
@@ -160,7 +162,7 @@ gibbsTI <- function(
     confidence = confidence
   )
 
-  # 7. Build S3 Object
+  # 6. Build S3 Object
   fit <- list(
     call = match.call(),
     data = x,
@@ -168,6 +170,8 @@ gibbsTI <- function(
     type = if(side == "one") type else "centered",
     target = target,
     eta = eta_val,
+    calibrated_coverage = final_coverage,
+    eta_history = eta_history,
     tau_used = if(side == "one") tau_use else c(tau_lower, tau_upper),
     interval = interval,
     samples = samples,

@@ -91,6 +91,7 @@ List calibrate_eta_cpp(NumericVector y, double tau, double alpha = 0.1, double e
   for(int b = 0; b < B; b++) boots(_, b) = sample(y, n, true);
 
   double eta_current = eta0;
+  double final_cov = 0.0;
   NumericVector eta_history(max_iter + 1);
   eta_history[0] = eta_current;
 
@@ -99,6 +100,8 @@ List calibrate_eta_cpp(NumericVector y, double tau, double alpha = 0.1, double e
     double kappa_s = c / std::pow(1.0 + s, gamma);
     double est_coverage = bootstrap_coverage_cpp(tau, alpha, B, eta_current, theta_hat,
                                                  boots, n_samps_boot, burn_in_boot, w, m);
+
+    final_cov = est_coverage;
 
     if(verbose) {
       Rcpp::Rcout << "Iteration " << s << ": eta = " << std::fixed << std::setprecision(4)
@@ -118,5 +121,6 @@ List calibrate_eta_cpp(NumericVector y, double tau, double alpha = 0.1, double e
   }
 
   return List::create(_["final_eta"] = eta_current,
+                      _["final_coverage"] = final_cov,
                       _["eta_history"] = eta_history[Range(0, (s < max_iter ? s : (max_iter)))]);
 }

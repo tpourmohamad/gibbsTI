@@ -157,6 +157,7 @@ List calibrate_eta_joint_quantile_cpp(NumericVector y,
 
   double eta = eta0;
   double eta_prev = eta;
+  double final_cov = 0.0; // Captures the coverage from the last iteration
   NumericVector hist(max_iter + 1);
   hist[0] = eta;
 
@@ -166,6 +167,8 @@ List calibrate_eta_joint_quantile_cpp(NumericVector y,
 
     double cover = bootstrap_coverage_quantile_cpp(tau_lower, tau_upper, alpha, B, eta,
                                                    theta_hat_vec, boots, n_samps_boot, burn_in_boot, prop_sd);
+
+    final_cov = cover; // Update the persistent coverage variable
 
     if(verbose) {
       Rcpp::Rcout << "Iteration " << s << ": eta = " << std::fixed << std::setprecision(4)
@@ -185,8 +188,9 @@ List calibrate_eta_joint_quantile_cpp(NumericVector y,
   }
 
   return List::create(
-    _["final_eta"]   = eta,
-    _["eta_history"] = hist[Range(0, (s < max_iter ? s : max_iter))],
-                               _["theta_hat_vec"] = theta_hat_vec
+    _["final_eta"]      = eta,
+    _["final_coverage"] = final_cov, // New return value
+    _["eta_history"]    = hist[Range(0, (s < max_iter ? s : max_iter))],
+                                  _["theta_hat_vec"]  = theta_hat_vec
   );
 }
