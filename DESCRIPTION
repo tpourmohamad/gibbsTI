@@ -2,9 +2,13 @@ Package: gibbsTI
 Title: Calibrated Gibbs Posteriors for Tolerance Intervals
 Version: 0.1.0
 Authors@R: 
-    person("Tony", "Pourmohamad", 
-    email = "tpourmohamad@gmail.com", 
-    role = c("aut", "cre"))
+    c(person("Tony", "Pourmohamad",
+             email = "tpourmohamad@gmail.com",
+             role = c("aut", "cre")),
+      person("Robert", "Richardson",
+             role = "aut"),
+      person("Bruno", "Sansó",
+             role = "aut"))
 Description: Provides tools for constructing one-sided and two-sided
     nonparametric tolerance intervals using calibrated Gibbs posteriors.
     The methods target population quantiles and content levels while
