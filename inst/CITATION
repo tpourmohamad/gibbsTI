@@ -1,0 +1,17 @@
+bibentry(
+  bibtype = "Article",
+  title = "Calibrated Bayesian Nonparametric Tolerance Intervals",
+  author = c(
+    person("Tony", "Pourmohamad"),
+    person("Robert", "Richardson"),
+    person("Bruno", "Sansó")
+  ),
+  year = "2026",
+  journal = "Technometrics",
+  volume = "",
+  pages = "XX--XX",
+  textVersion =
+    "Pourmohamad T, Richardson R, Sansó B (2026).
+     Calibrated Gibbs Posteriors for Nonparametric Tolerance Intervals.
+     Technometrics."
+)
