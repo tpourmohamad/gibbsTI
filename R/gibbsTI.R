@@ -7,7 +7,7 @@
 #'
 #' @param x Numeric vector of observations (at least 5, all finite).
 #' @param side Direction of the interval: `"one"` (one-sided) or `"two"`
-#'   (two-sided, centered).
+#'   (two-sided).
 #' @param type For one-sided intervals only, `"upper"` (bound above) or `"lower"`
 #'   (bound below). Ignored when `side = "two"`.
 #' @param target Calibration target: `"content"` (default; the interval is
