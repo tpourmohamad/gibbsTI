@@ -1,4 +1,5 @@
 #' Internal wrapper for GPC calibration
+#' @noRd
 .calibrate_eta_gpc <- function(x, side, target, content, confidence,
                                tau, tau_lower, tau_upper, verbose, eta0,
                                max_iter, B, tol, c, gamma, prop_sd, w, m,
@@ -65,6 +66,7 @@
   return(out)
 }
 #' Internal wrapper for final MCMC sampling
+#' @noRd
 .run_sampler <- function(x, side, target, tau, tau_lower, tau_upper,
                          eta, n_mcmc, burnin, thin, w, m, prop_sd, verbose) { # <--- Added prop_sd
 

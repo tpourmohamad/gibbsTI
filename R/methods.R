@@ -68,4 +68,5 @@ plot.gibbsTI <- function(x, ...) {
 
   leg_text <- if(x$side == "one") paste(tools::toTitleCase(x$type), "Limit") else "Tolerance Interval"
   legend("topright", legend = leg_text, col = "firebrick", lwd = 2, lty = 2, bty = "n")
+  invisible(x)
 }

@@ -1,4 +1,10 @@
-.validate_inputs <- function(x, content, confidence, target, tau_use, tau_lower, tau_upper, eta_method, eta) {
+.validate_inputs <- function(x, content, confidence, target, tau_use, tau_lower, tau_upper,
+                             eta_method, eta, max_iter, n_mcmc, burnin, thin) {
+
+  # Helper: single positive whole number
+  is_pos_int <- function(v) {
+    is.numeric(v) && length(v) == 1 && is.finite(v) && v >= 1 && v == round(v)
+  }
 
   # 1. Data Checks (x)
   if (!is.numeric(x))
@@ -47,6 +53,19 @@
       stop("eta must be a single positive numeric value.")
     }
   }
+
+  # 5. MCMC / calibration iteration counts
+  if (!is_pos_int(n_mcmc))
+    stop("n_mcmc must be a single positive integer.")
+
+  if (!is_pos_int(burnin))
+    stop("burnin must be a single positive integer.")
+
+  if (!is_pos_int(thin))
+    stop("thin must be a single positive integer.")
+
+  if (!is_pos_int(max_iter))
+    stop("max_iter must be a single positive integer.")
 
   invisible(TRUE)
 }

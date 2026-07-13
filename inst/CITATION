@@ -8,10 +8,10 @@ bibentry(
   ),
   year = "2026",
   journal = "Technometrics",
-  volume = "",
-  pages = "XX--XX",
+  pages = "1--27",
+  doi = "10.1080/00401706.2026.2699103",
   textVersion =
     "Pourmohamad T, Richardson R, Sansó B (2026).
-     Calibrated Gibbs Posteriors for Nonparametric Tolerance Intervals.
-     Technometrics."
+     Calibrated Bayesian Nonparametric Tolerance Intervals.
+     Technometrics, 1-27. doi:10.1080/00401706.2026.2699103."
 )

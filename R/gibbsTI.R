@@ -1,35 +1,75 @@
 #' Fit a Gibbs Posterior Tolerance Interval
 #'
-#' @param x Numeric vector of observations.
-#' @param side Direction of the interval: "one" (one-sided) or "two" (two-sided centered).
-#' @param type Type of one-sided interval: "upper" (bound above) or "lower" (bound below).
-#' @param target The calibration target: "content" (default for TIs) or "quantile".
-#' @param content Population content level (e.g., 0.95).
-#' @param confidence Confidence level (e.g., 0.90).
-#' @param tau Target quantile (required for one-sided quantile target).
-#' @param tau_lower Lower quantile (for two-sided quantile target).
-#' @param tau_upper Upper quantile (for two-sided quantile target).
-#' @param calibrate Logical; whether to use GPC calibration.
-#' @param eta_method "GPC" (automated) or "fixed".
-#' @param eta Fixed value of eta if calibrate = FALSE.
-#' @param max_iter Maximum number of iterations for the GPC eta search (default is 15).
-#' @param control A list of control parameters for MCMC and GPC:
+#' Constructs a one-sided or two-sided nonparametric tolerance interval from a
+#' calibrated Gibbs posterior. The learning rate `eta` is chosen automatically by
+#' Gibbs posterior calibration (GPC) so that the interval attains the nominal
+#' frequentist coverage, or it can be fixed by the user.
+#'
+#' @param x Numeric vector of observations (at least 5, all finite).
+#' @param side Direction of the interval: `"one"` (one-sided) or `"two"`
+#'   (two-sided, centered).
+#' @param type For one-sided intervals only, `"upper"` (bound above) or `"lower"`
+#'   (bound below). Ignored when `side = "two"`.
+#' @param target Calibration target: `"content"` (default; the interval is
+#'   defined by a population proportion) or `"quantile"` (the interval targets
+#'   explicit population quantiles supplied through `tau`, `tau_lower`,
+#'   `tau_upper`).
+#' @param content Population proportion the interval should contain, in (0, 1)
+#'   (e.g. 0.95). Used when `target = "content"`; when `target = "quantile"` it
+#'   only supplies defaults for any unset `tau_*` argument.
+#' @param confidence Frequentist confidence level in (0, 1) (e.g. 0.90). This is
+#'   both the GPC coverage target (`1 - alpha`) and the posterior level read off
+#'   as the reported limit.
+#' @param tau Target quantile for a one-sided `"quantile"` interval, in (0, 1).
+#'   Only used when `target = "quantile"`; ignored when `target = "content"`.
+#' @param tau_lower,tau_upper Lower/upper target quantiles for a two-sided
+#'   `"quantile"` interval, in (0, 1) with `tau_lower < tau_upper`. Only used
+#'   when `target = "quantile"`; ignored when `target = "content"`.
+#' @param eta_method How the Gibbs learning rate `eta` is chosen: `"GPC"`
+#'   (default; data-driven calibration) or `"fixed"` (use the supplied `eta`).
+#' @param eta Gibbs learning rate (positive). Optional starting value when
+#'   `eta_method = "GPC"` (defaults to 1); required when `eta_method = "fixed"`.
+#' @param max_iter Maximum number of Robbins-Monro iterations for the GPC search
+#'   (default 15). Only used when `eta_method = "GPC"`.
+#' @param control A list of control parameters for the MCMC samplers and GPC:
 #' \itemize{
 #'    \item \code{B}: Number of bootstrap replicates for calibration (default 200).
 #'    \item \code{tol}: Convergence tolerance for eta (default 1e-3).
 #'    \item \code{c}, \code{gamma}: Step-size parameters for Robbins-Monro (defaults 0.5, 0.75).
 #'    \item \code{w}, \code{m}: Slice sampler width and max steps for one-sided intervals.
-#'    \item \code{prop_sd}: Proposal standard deviation for Metropolis-Hastings in two-sided case.
+#'    \item \code{prop_sd}: Proposal standard deviation for Metropolis-Hastings in the two-sided case.
 #'    \item \code{n_samps_calib}: MCMC samples used per bootstrap during calibration (default 1000).
 #'    \item \code{burnin_calib}: Burn-in used per bootstrap during calibration (default 200).
 #' }
-#' @param n_mcmc Number of iterations for final sampling.
-#' @param burnin Number of burn-in iterations.
-#' @param thin Thinning interval for MCMC sampling (default is 1).
-#' @param seed Random seed.
-#' @param verbose Logical; if TRUE, prints progress messages.
+#' @param n_mcmc Number of posterior draws retained for the final interval, after
+#'   burn-in and thinning (default 5000).
+#' @param burnin Number of initial iterations discarded as burn-in (default 1000).
+#' @param thin Thinning interval: every `thin`-th post-burn-in draw is kept
+#'   (default 1).
+#' @param seed Optional integer random seed for reproducibility.
+#' @param verbose Logical; if `TRUE`, prints progress messages.
 #'
-#' @return An object of class \code{"gibbsTI"}.
+#' @return An object of class \code{"gibbsTI"}: a list with the fitted
+#'   `interval` (a numeric limit for one-sided fits, or a list with `lower` and
+#'   `upper` for two-sided fits), the calibrated `eta`, the retained posterior
+#'   `samples`, the `data`, the quantile level(s) `tau_used`, calibration
+#'   diagnostics (`calibrated_coverage`, `eta_history`), and the `settings` used.
+#'   Use [print()], [summary()], and [plot()] on the result.
+#' @examples
+#' set.seed(1)
+#' x <- rnorm(50)
+#'
+#' # Fast: fix the learning rate (no calibration search)
+#' fit <- gibbsTI(x, side = "one", type = "upper", eta_method = "fixed",
+#'                eta = 1, n_mcmc = 500, burnin = 200, verbose = FALSE)
+#' print(fit)
+#'
+#' \donttest{
+#' # Data-driven GPC calibration (slower) for a two-sided 95%/90% interval
+#' fit2 <- gibbsTI(x, side = "two", content = 0.95, confidence = 0.90,
+#'                 seed = 1, verbose = FALSE)
+#' summary(fit2)
+#' }
 #' @export
 gibbsTI <- function(
     x,
@@ -41,7 +81,6 @@ gibbsTI <- function(
     tau = NULL,
     tau_lower = NULL,
     tau_upper = NULL,
-    calibrate = TRUE,
     eta_method = c("GPC", "fixed"),
     eta = NULL,
     max_iter = 15,
@@ -82,6 +121,10 @@ gibbsTI <- function(
     }
   }
 
+  # 2b. Validate inputs (uses the resolved tau values)
+  .validate_inputs(x, content, confidence, target, tau_use, tau_lower, tau_upper,
+                   eta_method, eta, max_iter, n_mcmc, burnin, thin)
+
   if (!is.null(seed)) set.seed(seed)
 
   # Variables to store calibration diagnostics
@@ -89,7 +132,7 @@ gibbsTI <- function(
   eta_history <- NULL
 
   # 3. Calibration Phase
-  if (calibrate && eta_method == "GPC") {
+  if (eta_method == "GPC") {
     if(verbose) message(sprintf("Calibrating eta via GPC for %s-sided %s target...", side, target))
 
     eta_start <- if (!is.null(eta)) eta else 1.0
@@ -124,12 +167,9 @@ gibbsTI <- function(
     eta_history    <- calib_res$eta_history
 
   } else {
-    if (is.null(eta)) {
-      if (eta_method == "fixed") stop("Must supply 'eta' when eta_method = 'fixed'.")
-      eta_val <- 1.0
-    } else {
-      eta_val <- eta
-    }
+    # eta_method == "fixed": use the user-supplied learning rate
+    # (.validate_inputs() has already checked that a positive eta was provided).
+    eta_val <- eta
   }
 
   # 4. Final Sampling Phase

@@ -5,10 +5,16 @@
 \alias{gibbsTI-package}
 \title{gibbsTI: Calibrated Gibbs Posteriors for Tolerance Intervals}
 \description{
-Provides tools for constructing one-sided and two-sided nonparametric tolerance intervals using calibrated Gibbs posteriors. The methods target population quantiles and content levels while achieving nominal frequentist coverage through data-driven calibration.
+Provides tools for constructing one-sided and two-sided nonparametric tolerance intervals using calibrated Gibbs posteriors. The methods target population quantiles and content levels while achieving nominal frequentist coverage through data-driven calibration. The methodology is described in Pourmohamad, Richardson, and Sansó (2026).
 }
 \author{
 \strong{Maintainer}: Tony Pourmohamad \email{tpourmohamad@gmail.com}
+
+Authors:
+\itemize{
+  \item Robert Richardson
+  \item Bruno Sansó
+}
 
 }
 \keyword{internal}
